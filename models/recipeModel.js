@@ -6,7 +6,10 @@ const recipeSchema = mongoose.Schema(
       type: String,
       required: [true, "Enter the Dish Name"],
     },
-
+    description: {
+      type: String,
+      required: [true, "Enter the Description"],
+    },
     category: {
       type: String,
       required: [true, "Enter the Dish Type"],

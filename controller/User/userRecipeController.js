@@ -32,10 +32,10 @@ cloudinary.config({
 
 /////////////////////////  CREATING RECIPES  ////////////////////////////////////
 const createRecipe = asyncHandler(async (req, res) => {
-  const {dishName, category, recipe} = req.body;
+  const {dishName, description, category, recipe} = req.body;
   const image = req.file;
 
-  if (!dishName || !category || !recipe || !image) {
+  if (!dishName || !description || !category || !recipe || !image) {
     res.status(400);
     throw new Error("Please Enter All Credentials");
   }
@@ -54,6 +54,7 @@ const createRecipe = asyncHandler(async (req, res) => {
 
   const createdRecipe = await Recipe.create({
     dishName,
+    description,
     category,
     recipe,
     image: {
