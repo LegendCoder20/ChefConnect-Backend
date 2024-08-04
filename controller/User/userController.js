@@ -30,8 +30,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (user) {
     res.status(200).json({
-      _id: user.id,
-      email: user.email,
+      // _id: user.id,
+      // email: user.email,
       token: generateToken(user._id),
     });
   } else {
@@ -53,8 +53,9 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (user && (await bcrypt.compare(password, user.password))) {
     res.status(200).json({
-      username: user.username,
-      email,
+      // username: user.username,
+      // email,
+
       token: generateToken(user._id),
     });
   } else {

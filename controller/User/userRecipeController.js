@@ -15,7 +15,7 @@ const getAllRecipe = asyncHandler(async (req, res) => {
 /////////////////////////  GET RECIPE DETAILS  ////////////////////////////////////
 const getRecipeDetails = asyncHandler(async (req, res) => {
   const recipe = await Recipe.findById(req.params.id);
-  console.log(recipe);
+  // console.log(recipe);
   res.status(200).json({
     recipe: recipe,
     msg: ` Got ${req.params.id} I d Detailed Recipe `,
