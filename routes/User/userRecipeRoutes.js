@@ -13,9 +13,6 @@ const {
 
 router.get("/", protect, getAllRecipe);
 router.post("/addrecipe", protect, upload, createRecipe);
-router
-  .route("/:id")
-  .delete(protect, deleteRecipe)
-  .get(protect, getRecipeDetails);
+router.route("/:id").delete(protect, deleteRecipe).get(protect, getAllRecipe);
 
 module.exports = router;

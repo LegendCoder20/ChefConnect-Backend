@@ -18,7 +18,7 @@ const getRecipeDetails = asyncHandler(async (req, res) => {
   // console.log(recipe);
   res.status(200).json({
     recipe: recipe,
-    msg: ` Got ${req.params.id} I d Detailed Recipe `,
+    msg: ` Got ${req.params.id} Id Detailed Recipe `,
   });
 });
 

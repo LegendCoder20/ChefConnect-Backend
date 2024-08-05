@@ -44,10 +44,6 @@ const recipeSchema = mongoose.Schema(
           ref: "User", // Stores the reference to the user who wrote the review
           required: true,
         },
-        username: {
-          type: String,
-          required: true,
-        },
 
         comment: {
           type: String,
