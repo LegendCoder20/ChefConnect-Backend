@@ -75,7 +75,7 @@ const getUser = asyncHandler(async (req, res) => {
 // Generate Token
 
 const generateToken = (id) => {
-  return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "5d"});
+  return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "30d"});
 };
 
 module.exports = {
