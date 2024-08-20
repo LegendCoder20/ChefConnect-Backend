@@ -26,16 +26,27 @@ const recipeSchema = mongoose.Schema(
         type: String,
       },
     },
-    like: {
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    dislikes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    likesCount: {
       type: Number,
       default: 0,
-      required: true,
     },
-    dislike: {
+    dislikesCount: {
       type: Number,
       default: 0,
-      required: true,
     },
+
     // REVIEWS
     reviews: [
       {
