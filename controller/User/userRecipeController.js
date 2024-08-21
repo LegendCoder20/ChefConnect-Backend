@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Recipe = require("../../models/recipeModel");
+
 const dataUri = require("../../utils/dataUri");
 
 /////////////////////////  GET ALL RECIPES  ////////////////////////////////////
@@ -108,8 +109,9 @@ const deleteRecipe = asyncHandler(async (req, res) => {
 
 const likeRecipe = asyncHandler(async (req, res) => {
   const recipeId = req.params.id;
-  const userId = req.user.id;
+  const userId = req.user?.id;
 
+  // Find the recipe by ID
   const recipe = await Recipe.findById(recipeId);
 
   if (!recipe) {
@@ -123,51 +125,47 @@ const likeRecipe = asyncHandler(async (req, res) => {
   }
 
   if (recipe.dislikes.includes(userId)) {
-    recipe.dislikes.pull(userId);
-    recipe.dislikesCount = Math.max(recipe.dislikesCount - 1, 0);
+    recipe.dislikes = recipe.dislikes.filter((id) => id !== userId);
+    recipe.likes.push(userId);
+    recipe.likesCount = recipe.likes.length;
+    recipe.dislikesCount = recipe.dislikes.length;
+  } else {
+    recipe.likes.push(userId);
+    recipe.likesCount = recipe.likes.length;
   }
 
-  recipe.likes.push(userId);
-  recipe.likesCount = recipe.likes.length;
-
+  // Save the updated recipe
   await recipe.save();
 
   res.status(200).json({
     recipe,
-    msg: "Recipe Liked",
+    likesCount: recipe.likesCount,
+    dislikesCount: recipe.dislikesCount,
+    msg: "Recipe liked",
   });
 });
 
-const dislikeRecipe = asyncHandler(async (req, res) => {
+const checkIfRecipeLiked = asyncHandler(async (req, res) => {
   const recipeId = req.params.id;
-  const userId = req.user.id;
+  const userId = req.user.id; // assuming you have user info in req.user
 
+  // Find the recipe by ID
   const recipe = await Recipe.findById(recipeId);
 
   if (!recipe) {
-    res.status(404);
-    throw new Error("Recipe Not Found");
-  }
-  if (recipe.dislikes.includes(userId)) {
-    res.status(400);
-    throw new Error("You Already Disliked this Recipe");
+    return res.status(404).json({message: "Recipe not found"});
   }
 
-  if (recipe.likes.includes(userId)) {
-    recipe.likes.pull(userId);
-    recipe.likesCount -= 1;
-  }
+  // Check if the user has liked the recipe
+  const isLiked = recipe.likes.includes(userId);
 
-  recipe.dislikes.push(userId);
-  recipe.dislikesCount += 1;
-
-  await recipe.save();
-
-  res.status(200).json({
-    recipe,
-    msg: "Recipe Disliked",
-  });
+  return res.status(200).json({liked: isLiked});
 });
+
+// ///////////////
+
+const dislikeRecipe = asyncHandler(async (req, res) => {});
+const checkIfRecipeDisliked = asyncHandler(async (req, res) => {});
 
 module.exports = {
   getAllRecipe,
@@ -175,5 +173,7 @@ module.exports = {
   createRecipe,
   deleteRecipe,
   likeRecipe,
+  checkIfRecipeLiked,
   dislikeRecipe,
+  checkIfRecipeDisliked,
 };

@@ -22,17 +22,13 @@ const recipeSchema = mongoose.Schema(
       public_id: {
         type: String,
       },
+
       url: {
         type: String,
       },
     },
+
     likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    dislikes: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -42,7 +38,13 @@ const recipeSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    dislikesCount: {
+    dislikes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    dislikeCount: {
       type: Number,
       default: 0,
     },
