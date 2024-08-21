@@ -96,7 +96,11 @@ const deleteRecipe = asyncHandler(async (req, res) => {
 
   await cloudinary.uploader.destroy(recipe.image.public_id);
   await Recipe.findByIdAndDelete(recipeId);
+
+  const recipes = await Recipe.find({user: req.user.id});
+
   res.status(200).json({
+    recipes: recipes,
     msg: "Recipe Deleted Successfully",
   });
 });
