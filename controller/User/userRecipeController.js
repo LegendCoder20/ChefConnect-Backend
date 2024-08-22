@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Recipe = require("../../models/recipeModel");
+const recipeSchema = require("../../Validation Checks/recipeValidation");
 
 const dataUri = require("../../utils/dataUri");
 
@@ -35,6 +36,16 @@ cloudinary.config({
 const createRecipe = asyncHandler(async (req, res) => {
   const {dishName, description, category, recipe} = req.body;
   const image = req.file;
+
+  const checkValidation = recipeSchema.safeParse(req.body);
+  if (!checkValidation.success) {
+    res.status(400);
+    throw new Error(
+      `Validation Error : ${checkValidation.error.errors
+        .map((e) => e.message)
+        .join(", ")}`
+    );
+  }
 
   if (!dishName || !description || !category || !recipe || !image) {
     res.status(400);

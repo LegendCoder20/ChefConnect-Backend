@@ -1,13 +1,31 @@
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const zod = require("zod");
 
 const User = require("../../models/userModel");
+const {
+  registerSchema,
+  loginSchema,
+} = require("../../Validation Checks/userValidation");
+const {Error} = require("mongoose");
 
 // REGISTER USER //
 
 const registerUser = asyncHandler(async (req, res) => {
   const {username, email, password} = req.body;
+
+  const checkValidation = registerSchema.safeParse(req.body);
+
+  if (!checkValidation.success) {
+    res.status(400);
+    throw new Error(
+      `Validation Error: ${checkValidation.error.errors
+        .map((e) => e.message)
+        .join(", ")}`
+    );
+  }
+
   if (!username || !email || !password) {
     res.status(400);
     throw new Error("Please Enter All Credentials");
@@ -44,6 +62,17 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   const {email, password} = req.body;
+
+  const checkValidation = loginSchema.safeParse(req.body);
+  if (!checkValidation.success) {
+    res.status(400);
+    throw new Error(
+      `Validation Error : ${checkValidation.error.errors
+        .map((e) => e.message)
+        .join(", ")}`
+    );
+  }
+
   if (!email || !password) {
     res.status(400);
     throw new Error("Please Enter All Credentials");
