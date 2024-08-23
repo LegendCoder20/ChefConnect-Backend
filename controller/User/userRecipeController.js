@@ -162,7 +162,24 @@ const likeRecipe = asyncHandler(async (req, res) => {
 
 const checkIfRecipeLiked = asyncHandler(async (req, res) => {
   const recipeId = req.params.id;
-  const userId = req.user.id; // assuming you have user info in req.user
+  const userId = req.user.id;
+
+  const recipe = await Recipe.findById(recipeId);
+
+  if (!recipe) {
+    return res.status(404).json({message: "Recipe not found"});
+  }
+
+  const isLiked = recipe.likes.includes(userId);
+
+  return res.status(200).json({liked: isLiked});
+});
+
+// ///////////////
+
+const dislikeRecipe = asyncHandler(async (req, res) => {
+  const recipeId = req.params.id;
+  const userId = req.user?.id;
 
   // Find the recipe by ID
   const recipe = await Recipe.findById(recipeId);
@@ -171,16 +188,47 @@ const checkIfRecipeLiked = asyncHandler(async (req, res) => {
     return res.status(404).json({message: "Recipe not found"});
   }
 
-  // Check if the user has liked the recipe
-  const isLiked = recipe.likes.includes(userId);
+  if (recipe.dislikes.includes(userId)) {
+    return res
+      .status(400)
+      .json({message: "You have already disliked this recipe"});
+  }
 
-  return res.status(200).json({liked: isLiked});
+  if (recipe.likes.includes(userId)) {
+    recipe.likes = recipe.likes.filter((id) => id !== userId);
+    recipe.dislikes.push(userId);
+    recipe.likesCount = recipe.likes.length;
+    recipe.dislikesCount = recipe.dislikes.length;
+  } else {
+    recipe.dislikes.push(userId);
+    recipe.dislikesCount = recipe.dislikes.length;
+  }
+
+  // Save the updated recipe
+  await recipe.save();
+
+  res.status(200).json({
+    recipe,
+    likesCount: recipe.likesCount,
+    dislikesCount: recipe.dislikesCount,
+    msg: "Recipe disliked",
+  });
 });
 
-// ///////////////
+const checkIfRecipeDisliked = asyncHandler(async (req, res) => {
+  const recipeId = req.params.id;
+  const userId = req.user.id;
 
-const dislikeRecipe = asyncHandler(async (req, res) => {});
-const checkIfRecipeDisliked = asyncHandler(async (req, res) => {});
+  const recipe = await Recipe.findById(recipeId);
+
+  if (!recipe) {
+    return res.status(404).json({message: "Recipe not found"});
+  }
+
+  const isDisliked = recipe.dislikes.includes(userId);
+
+  return res.status(200).json({disliked: isDisliked});
+});
 
 module.exports = {
   getAllRecipe,
