@@ -116,7 +116,41 @@ const deleteRecipe = asyncHandler(async (req, res) => {
   });
 });
 
-// const updateRecipe = asyncHandler(async (req, res) => {});
+/////////////////////////  UPDATING RECIPES  ////////////////////////////////////
+const updateRecipe = asyncHandler(async (req, res) => {
+  const {dishName, description, category, recipe} = req.body;
+  const recipeId = req.params.id;
+
+  const checkValidation = recipeSchema.safeParse(req.body);
+  if (!checkValidation.success) {
+    res.status(400);
+    throw new Error("Please Enter All Credentials");
+  }
+  if (!req.user) {
+    throw new Error("User not Authorized");
+  }
+
+  const updatedRecipe = await Recipe.findByIdAndUpdate(
+    recipeId,
+    {
+      dishName,
+      description,
+      category,
+      recipe,
+    },
+    {new: true}
+  );
+
+  if (updatedRecipe) {
+    res.status(200).json({
+      recipe: updatedRecipe,
+      msg: "Recipe Updated",
+    });
+  } else {
+    res.status(400);
+    throw new Error("Invalid Recipe Data");
+  }
+});
 
 // ////////////////////////////////////////////////////////////// //
 
@@ -181,7 +215,6 @@ const dislikeRecipe = asyncHandler(async (req, res) => {
   const recipeId = req.params.id;
   const userId = req.user?.id;
 
-  // Find the recipe by ID
   const recipe = await Recipe.findById(recipeId);
 
   if (!recipe) {
@@ -196,22 +229,19 @@ const dislikeRecipe = asyncHandler(async (req, res) => {
 
   if (recipe.likes.includes(userId)) {
     recipe.likes = recipe.likes.filter((id) => id !== userId);
-    recipe.dislikes.push(userId);
     recipe.likesCount = recipe.likes.length;
-    recipe.dislikesCount = recipe.dislikes.length;
-  } else {
-    recipe.dislikes.push(userId);
-    recipe.dislikesCount = recipe.dislikes.length;
   }
 
-  // Save the updated recipe
+  recipe.dislikes.push(userId);
+  recipe.dislikesCount = recipe.dislikes.length;
+
   await recipe.save();
 
   res.status(200).json({
     recipe,
-    likesCount: recipe.likesCount,
+    likesCount: recipe.likesCount - 1,
     dislikesCount: recipe.dislikesCount,
-    msg: "Recipe disliked",
+    message: "Recipe disliked",
   });
 });
 
@@ -227,7 +257,10 @@ const checkIfRecipeDisliked = asyncHandler(async (req, res) => {
 
   const isDisliked = recipe.dislikes.includes(userId);
 
-  return res.status(200).json({disliked: isDisliked});
+  // Return the disliked status and current dislikes count
+  return res
+    .status(200)
+    .json({disliked: isDisliked, dislikesCount: recipe.dislikes.length});
 });
 
 module.exports = {
@@ -235,6 +268,7 @@ module.exports = {
   getRecipeDetails,
   createRecipe,
   deleteRecipe,
+  updateRecipe,
   likeRecipe,
   checkIfRecipeLiked,
   dislikeRecipe,

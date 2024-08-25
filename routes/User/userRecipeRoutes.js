@@ -6,7 +6,7 @@ const upload = require("../../middleware/User/imageUploadMiddleware");
 const {
   getAllRecipe,
   createRecipe,
-  // updateRecipe,
+  updateRecipe,
   deleteRecipe,
   getRecipeDetails,
   likeRecipe,
@@ -18,6 +18,7 @@ const {
 router.get("/", protect, getAllRecipe);
 router.post("/addrecipe", protect, upload, createRecipe);
 router.route("/:id").delete(protect, deleteRecipe).get(protect, getAllRecipe);
+router.patch("/update/:id", protect, updateRecipe);
 router.put("/like/:id", protect, likeRecipe);
 router.get("/like/:id", protect, checkIfRecipeLiked);
 router.put("/dislike/:id", protect, dislikeRecipe);
