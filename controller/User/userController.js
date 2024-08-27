@@ -15,6 +15,10 @@ const {Error} = require("mongoose");
 const registerUser = asyncHandler(async (req, res) => {
   const {username, email, password} = req.body;
 
+  console.log(username, "From Backend");
+  const aa = typeof username;
+  console.log(aa);
+
   const checkValidation = registerSchema.safeParse(req.body);
 
   if (!checkValidation.success) {
@@ -31,30 +35,47 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("Please Enter All Credentials");
   }
 
-  const userExists = await User.findOne({email});
-  if (userExists) {
-    res.status(409);
-    throw new Error("E-mail Already Exists");
+  const usernameExists = await User.findOne({username});
+  if (usernameExists) {
+    return res.status(409).json({error: "Username already taken"});
+  }
+
+  const emailExists = await User.findOne({email});
+  if (emailExists) {
+    return res.status(409).json({error: "Email already exists"});
   }
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const user = await User.create({
-    username,
-    email,
-    password: hashedPassword,
-  });
+  const capitalizeFirstLetterOfEachWord = (str) => {
+    return str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
 
-  if (user) {
-    res.status(200).json({
-      // _id: user.id,
-      // email: user.email,
-      token: generateToken(user._id),
+  const uniqueUserName = capitalizeFirstLetterOfEachWord(username);
+
+  if (uniqueUserName) {
+    const user = await User.create({
+      username: uniqueUserName,
+      email,
+      password: hashedPassword,
     });
+
+    if (user) {
+      res.status(200).json({
+        // _id: user.id,
+        // email: user.email,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(400);
+      throw new Error("Invalid Credentials");
+    }
   } else {
-    res.status(400);
-    throw new Error("Invalid Credentials");
+    return res.status(409).json({error: "Email already exists"});
   }
 });
 
@@ -74,8 +95,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   if (!email || !password) {
-    res.status(400);
-    throw new Error("Please Enter All Credentials");
+    return res.status(409).json({error: "Incorrect Email or Password."});
   }
 
   const user = await User.findOne({email});
