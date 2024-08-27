@@ -160,7 +160,6 @@ const likeRecipe = asyncHandler(async (req, res) => {
   const recipeId = req.params.id;
   const userId = req.user?.id;
 
-  // Find the recipe by ID
   const recipe = await Recipe.findById(recipeId);
 
   if (!recipe) {
@@ -177,19 +176,18 @@ const likeRecipe = asyncHandler(async (req, res) => {
     recipe.dislikes = recipe.dislikes.filter((id) => id !== userId);
     recipe.likes.push(userId);
     recipe.likesCount = recipe.likes.length;
-    recipe.dislikesCount = recipe.dislikes.length;
+    recipe.dislikeCount = recipe.dislikes.length;
   } else {
     recipe.likes.push(userId);
     recipe.likesCount = recipe.likes.length;
   }
 
-  // Save the updated recipe
   await recipe.save();
 
   res.status(200).json({
     recipe,
     likesCount: recipe.likesCount,
-    dislikesCount: recipe.dislikesCount,
+    dislikeCount: recipe.dislikeCount,
     msg: "Recipe liked",
   });
 });
@@ -229,18 +227,20 @@ const dislikeRecipe = asyncHandler(async (req, res) => {
 
   if (recipe.likes.includes(userId)) {
     recipe.likes = recipe.likes.filter((id) => id !== userId);
+    recipe.dislikes.push(userId);
+    recipe.dislikeCount = recipe.dislikes.length;
     recipe.likesCount = recipe.likes.length;
+  } else {
+    recipe.dislikes.push(userId);
+    recipe.dislikeCount = recipe.dislikes.length;
   }
-
-  recipe.dislikes.push(userId);
-  recipe.dislikesCount = recipe.dislikes.length;
 
   await recipe.save();
 
   res.status(200).json({
     recipe,
     likesCount: recipe.likesCount - 1,
-    dislikesCount: recipe.dislikesCount,
+    dislikeCount: recipe.dislikeCount,
     message: "Recipe disliked",
   });
 });
@@ -257,10 +257,9 @@ const checkIfRecipeDisliked = asyncHandler(async (req, res) => {
 
   const isDisliked = recipe.dislikes.includes(userId);
 
-  // Return the disliked status and current dislikes count
   return res
     .status(200)
-    .json({disliked: isDisliked, dislikesCount: recipe.dislikes.length});
+    .json({disliked: isDisliked, dislikeCount: recipe.dislikes.length});
 });
 
 module.exports = {
