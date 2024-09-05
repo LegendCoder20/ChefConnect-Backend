@@ -16,6 +16,7 @@ app.use(cors());
 app.use("/api/recipes", require("./routes/Guest/allRecipeRoutes"));
 app.use("/api/users", require("./routes/User/userRoutes"));
 app.use("/api/users/recipe", require("./routes/User/userRecipeRoutes"));
+app.use("/api/admin", require("./routes/Admin/adminRoutes"));
 
 const PORT = process.env.PORT || 3000;
 

@@ -173,14 +173,12 @@ const likeRecipe = asyncHandler(async (req, res) => {
   }
 
   if (recipe.dislikes.includes(userId)) {
-    recipe.dislikes = recipe.dislikes.filter((id) => id !== userId);
-    recipe.likes.push(userId);
-    recipe.likesCount = recipe.likes.length;
+    recipe.dislikes = recipe.dislikes.filter((id) => id.toString() !== userId);
     recipe.dislikeCount = recipe.dislikes.length;
-  } else {
-    recipe.likes.push(userId);
-    recipe.likesCount = recipe.likes.length;
   }
+
+  recipe.likes.push(userId);
+  recipe.likesCount = recipe.likes.length;
 
   await recipe.save();
 
@@ -226,20 +224,18 @@ const dislikeRecipe = asyncHandler(async (req, res) => {
   }
 
   if (recipe.likes.includes(userId)) {
-    recipe.likes = recipe.likes.filter((id) => id !== userId);
-    recipe.dislikes.push(userId);
-    recipe.dislikeCount = recipe.dislikes.length;
+    recipe.likes = recipe.likes.filter((id) => id.toString() !== userId);
     recipe.likesCount = recipe.likes.length;
-  } else {
-    recipe.dislikes.push(userId);
-    recipe.dislikeCount = recipe.dislikes.length;
   }
+
+  recipe.dislikes.push(userId);
+  recipe.dislikeCount = recipe.dislikes.length;
 
   await recipe.save();
 
   res.status(200).json({
     recipe,
-    likesCount: recipe.likesCount - 1,
+    likesCount: recipe.likesCount,
     dislikeCount: recipe.dislikeCount,
     message: "Recipe disliked",
   });
