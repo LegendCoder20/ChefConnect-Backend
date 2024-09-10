@@ -202,7 +202,11 @@ const checkIfRecipeLiked = asyncHandler(async (req, res) => {
 
   const isLiked = recipe.likes.includes(userId);
 
-  return res.status(200).json({liked: isLiked});
+  console.log(recipe.likes.length, "Recipe likes length");
+
+  return res
+    .status(200)
+    .json({liked: isLiked, likesCount: recipe.likes.length});
 });
 
 // ///////////////
